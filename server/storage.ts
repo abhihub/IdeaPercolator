@@ -37,9 +37,15 @@ export class DatabaseStorage implements IStorage {
 
   async getAllIdeas(userId?: number): Promise<Idea[]> {
     if (userId !== undefined) {
-      return await db.select().from(ideas).where(eq(ideas.userId, userId));
+      console.log("Filtering ideas for userId:", userId);
+      const userIdeas = await db.select().from(ideas).where(eq(ideas.userId, userId));
+      console.log("User ideas:", userIdeas);
+      return userIdeas;
     }
-    return await db.select().from(ideas);
+    console.log("Getting all ideas (no userId filter)");
+    const allIdeas = await db.select().from(ideas);
+    console.log("All ideas:", allIdeas);
+    return allIdeas;
   }
 
   async getIdea(id: number): Promise<Idea | undefined> {

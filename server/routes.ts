@@ -18,14 +18,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // If user is authenticated, return only their ideas
       if (req.isAuthenticated()) {
+        console.log("User authenticated, filtering ideas for user ID:", req.user.id);
         const ideas = await storage.getAllIdeas(req.user.id);
+        console.log("Found ideas:", ideas.length);
         return res.json(ideas);
       }
       
+      console.log("User not authenticated, returning all ideas");
       // For public viewing, return all ideas (could be limited or filtered in a real app)
       const ideas = await storage.getAllIdeas();
       res.json(ideas);
     } catch (error) {
+      console.error("Error fetching ideas:", error);
       res.status(500).json({ message: "Failed to fetch ideas" });
     }
   });
