@@ -13,9 +13,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create API routes
   const apiRouter = express.Router();
 
-  // Get all ideas
+  // Get all ideas - either all ideas for public viewing or just the user's ideas if logged in
   apiRouter.get("/ideas", async (req, res) => {
     try {
+      // If user is authenticated, return only their ideas
+      if (req.isAuthenticated()) {
+        const ideas = await storage.getAllIdeas(req.user.id);
+        return res.json(ideas);
+      }
+      
+      // For public viewing, return all ideas (could be limited or filtered in a real app)
       const ideas = await storage.getAllIdeas();
       res.json(ideas);
     } catch (error) {
@@ -45,8 +52,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create idea
   apiRouter.post("/ideas", async (req, res) => {
     try {
+      // Require authentication to create ideas
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to create ideas" });
+      }
+      
       const validatedData = insertIdeaSchema.parse(req.body);
-      const newIdea = await storage.createIdea(validatedData);
+      const newIdea = await storage.createIdea(validatedData, req.user.id);
       res.status(201).json(newIdea);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -60,6 +72,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update idea
   apiRouter.put("/ideas/:id", async (req, res) => {
     try {
+      // Require authentication to update ideas
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to update ideas" });
+      }
+
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid idea ID" });
@@ -68,6 +85,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const idea = await storage.getIdea(id);
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
+      }
+
+      // Only allow users to update their own ideas
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only update your own ideas" });
       }
 
       const validatedData = insertIdeaSchema.partial().parse(req.body);
@@ -85,6 +107,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update idea rank
   apiRouter.patch("/ideas/:id/rank", async (req, res) => {
     try {
+      // Require authentication to update idea rank
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to update idea rank" });
+      }
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid idea ID" });
@@ -99,6 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
       }
+      
+      // Only allow users to update their own ideas
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only update your own ideas" });
+      }
 
       const updatedIdea = await storage.updateIdeaRank(id, rank);
       res.json(updatedIdea);
@@ -110,6 +142,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete idea
   apiRouter.delete("/ideas/:id", async (req, res) => {
     try {
+      // Require authentication to delete ideas
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to delete ideas" });
+      }
+      
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid idea ID" });
@@ -118,6 +155,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const idea = await storage.getIdea(id);
       if (!idea) {
         return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Only allow users to delete their own ideas
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only delete your own ideas" });
       }
 
       await storage.deleteIdea(id);

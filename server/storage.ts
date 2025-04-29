@@ -35,7 +35,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getAllIdeas(): Promise<Idea[]> {
+  async getAllIdeas(userId?: number): Promise<Idea[]> {
+    if (userId !== undefined) {
+      return await db.select().from(ideas).where(eq(ideas.userId, userId));
+    }
     return await db.select().from(ideas);
   }
 
@@ -44,7 +47,7 @@ export class DatabaseStorage implements IStorage {
     return idea;
   }
 
-  async createIdea(insertIdea: InsertIdea): Promise<Idea> {
+  async createIdea(insertIdea: InsertIdea, userId?: number): Promise<Idea> {
     const now = new Date();
     const [idea] = await db
       .insert(ideas)
@@ -52,7 +55,7 @@ export class DatabaseStorage implements IStorage {
         ...insertIdea,
         dateCreated: now,
         dateModified: now,
-        userId: null
+        userId: userId || null
       })
       .returning();
     return idea;
