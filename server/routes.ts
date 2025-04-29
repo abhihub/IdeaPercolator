@@ -1,10 +1,12 @@
 import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertIdeaSchema } from "@shared/schema";
+import { db } from "./db";
+import { insertIdeaSchema, ideas, users } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { setupAuth, ensureAuthenticated } from "./auth";
+import { eq, and } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -170,6 +172,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete idea" });
+    }
+  });
+
+  // Publish an idea
+  apiRouter.patch("/ideas/:id/publish", async (req, res) => {
+    try {
+      // Require authentication to publish ideas
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to publish ideas" });
+      }
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+
+      const idea = await storage.getIdea(id);
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Only allow users to publish their own ideas
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only publish your own ideas" });
+      }
+
+      // Update the idea to be published
+      const [updatedIdea] = await db
+        .update(ideas)
+        .set({ 
+          published: true,
+          dateModified: new Date() 
+        })
+        .where(eq(ideas.id, id))
+        .returning();
+
+      res.json(updatedIdea);
+    } catch (error) {
+      console.error("Error publishing idea:", error);
+      res.status(500).json({ message: "Failed to publish idea" });
+    }
+  });
+
+  // Get public ideas for a specific user
+  app.get("/api/public/:username", async (req, res) => {
+    try {
+      const { username } = req.params;
+      
+      // First, get the user by username
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get only published ideas for the user
+      const publishedIdeas = await db
+        .select()
+        .from(ideas)
+        .where(and(
+          eq(ideas.userId, user.id),
+          eq(ideas.published, true)
+        ));
+      
+      res.json(publishedIdeas);
+    } catch (error) {
+      console.error("Error fetching public ideas:", error);
+      res.status(500).json({ message: "Failed to fetch public ideas" });
     }
   });
 

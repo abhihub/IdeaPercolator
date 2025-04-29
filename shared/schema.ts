@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -16,6 +16,7 @@ export const ideas = pgTable("ideas", {
   dateCreated: timestamp("date_created").notNull().defaultNow(),
   dateModified: timestamp("date_modified").notNull().defaultNow(),
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  published: boolean("published").notNull().default(false),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
