@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Idea, InsertIdea } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 type SortOption = "rank-desc" | "rank-asc" | "recent";
 
@@ -14,6 +15,7 @@ export interface SortOptionType {
 export function useIdeas() {
   const [currentSort, setCurrentSort] = useState<SortOption>("recent");
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Define sort options
   const sortOptions: SortOptionType[] = [
@@ -28,7 +30,8 @@ export function useIdeas() {
     isLoading,
     refetch,
   } = useQuery<Idea[]>({
-    queryKey: ["/api/ideas"],
+    // Include user ID in the query key to ensure proper cache invalidation when switching users
+    queryKey: ["/api/ideas", user?.id],
   });
 
   // Create a new idea
@@ -38,7 +41,7 @@ export function useIdeas() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas", user?.id] });
       toast({
         title: "Idea created",
         description: "Your idea has been successfully created.",
@@ -61,7 +64,7 @@ export function useIdeas() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas", user?.id] });
       toast({
         title: "Idea updated",
         description: "Your idea has been successfully updated.",
@@ -83,7 +86,7 @@ export function useIdeas() {
       return id;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas", user?.id] });
       toast({
         title: "Idea deleted",
         description: "Your idea has been successfully deleted.",
@@ -105,7 +108,7 @@ export function useIdeas() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas", user?.id] });
     },
     onError: (error) => {
       toast({
