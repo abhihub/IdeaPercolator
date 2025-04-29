@@ -119,6 +119,28 @@ export function useIdeas() {
     },
   });
 
+  // Publish an idea
+  const { mutateAsync: publishIdea, isPending: isPublishing } = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("PATCH", `/api/ideas/${id}/publish`, {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ideas", user?.id] });
+      toast({
+        title: "Idea published",
+        description: "Your idea has been successfully published and is now publicly accessible.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to publish idea",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Sort ideas based on current sort option
   const sortedIdeas = [...ideas].sort((a, b) => {
     if (currentSort === "rank-desc") {

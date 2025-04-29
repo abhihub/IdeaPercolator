@@ -4,22 +4,25 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
-import { ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
+import { ChevronUp, ChevronDown, MoreVertical, Share } from "lucide-react";
 import { cn, formatDate, getMatureLabel } from "@/lib/utils";
 import { Idea } from "@shared/schema";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface IdeaCardProps {
   idea: Idea;
   onEdit: () => void;
   onDelete: () => void;
   onRankChange: (id: number, rank: number) => void;
+  onPublish?: (id: number) => void;
   isUpdating: boolean;
 }
 
-export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, isUpdating }: IdeaCardProps) {
+export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPublish, isUpdating }: IdeaCardProps) {
   const [isRankUpdating, setIsRankUpdating] = useState(false);
   
   const handleRankChange = async (change: number) => {
@@ -80,7 +83,15 @@ export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, isUpdat
         {/* Content */}
         <div className="p-5 flex-1 order-1 sm:order-2">
           <div className="flex justify-between items-start mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">{idea.title}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900">{idea.title}</h3>
+              {idea.published && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                  <Share className="mr-1 h-3 w-3" />
+                  Published
+                </Badge>
+              )}
+            </div>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -92,6 +103,15 @@ export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, isUpdat
                 <DropdownMenuItem onClick={onEdit}>
                   Edit Idea
                 </DropdownMenuItem>
+                {onPublish && !idea.published && (
+                  <>
+                    <DropdownMenuItem onClick={() => onPublish(idea.id)} className="text-blue-600">
+                      <Share className="mr-2 h-4 w-4" />
+                      Publish Idea
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={onDelete} className="text-red-600">
                   Delete Idea
                 </DropdownMenuItem>
