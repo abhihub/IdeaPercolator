@@ -4,8 +4,12 @@ import { storage } from "./storage";
 import { insertIdeaSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { setupAuth, ensureAuthenticated } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  setupAuth(app);
+  
   // Create API routes
   const apiRouter = express.Router();
 
