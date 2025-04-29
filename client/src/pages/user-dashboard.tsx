@@ -2,7 +2,7 @@ import { useParams, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useIdeas } from "@/hooks/useIdeas";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import IdeaForm from "@/components/IdeaForm";
 import IdeaCard from "@/components/IdeaCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,11 +18,13 @@ export default function UserDashboard() {
   const { user, logoutMutation } = useAuth();
   
   // Redirect if the URL username doesn't match the logged-in user
-  if (user && user.username !== username) {
-    navigate(`/${user.username}`);
-  }
+  useEffect(() => {
+    if (user && user.username !== username) {
+      navigate(`/${user.username}`);
+    }
+  }, [user, username, navigate]);
   
-  const { ideas, isLoading, isError, sortOptions, createIdea, updateIdea, deleteIdea, updateIdeaRank, sort } = useIdeas();
+  const { ideas, isLoading, sortOptions, createIdea, updateIdea, deleteIdea, updateIdeaRank, sort } = useIdeas();
   
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
   const [showForm, setShowForm] = useState(false);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Navigate, useLocation } from "wouter";
+import { useLocation } from "wouter";
 
 const loginSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
@@ -31,9 +31,11 @@ export default function AuthPage() {
   const [_, navigate] = useLocation();
 
   // Redirect if already logged in
-  if (user) {
-    return <Navigate to={`/${user.username}`} />;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate(`/${user.username}`);
+    }
+  }, [user, navigate]);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
