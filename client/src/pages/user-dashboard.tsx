@@ -98,10 +98,18 @@ export default function UserDashboard() {
           <h1 className="text-3xl font-bold">Thought Percolator</h1>
           <p className="text-muted-foreground">Welcome, {username}!</p>
         </div>
-        <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex gap-2">
+          <Link href={`/public/${username}`}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Share className="h-4 w-4" />
+              View Public Ideas
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </header>
 
       <div className="flex justify-between items-center mb-6">
