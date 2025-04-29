@@ -1,7 +1,7 @@
 import { useParams, Link } from "wouter";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import IdeaCard from "@/components/IdeaCard";
+import PublicIdeaCard from "@/components/PublicIdeaCard";
 import { Idea } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Home, Loader2 } from "lucide-react";
@@ -100,13 +100,9 @@ export default function PublicIdeas() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {sortedIdeas.map((idea) => (
-          <IdeaCard
+          <PublicIdeaCard
             key={idea.id}
             idea={idea}
-            onEdit={() => {}}  // Disabled for public view
-            onDelete={() => {}} // Disabled for public view
-            onRankChange={() => {}} // Disabled for public view
-            isUpdating={false}
           />
         ))}
       </div>
