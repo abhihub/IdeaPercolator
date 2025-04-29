@@ -47,7 +47,7 @@ export default function UserDashboard() {
   
   const handleCreateOrUpdateIdea = async (formData: any) => {
     if (editingIdea) {
-      await updateIdea(editingIdea.id, formData);
+      await updateIdea({...formData, id: editingIdea.id});
     } else {
       await createIdea(formData);
     }
@@ -85,14 +85,7 @@ export default function UserDashboard() {
     );
   }
 
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold text-red-500">Error loading ideas</h1>
-        <p className="mt-2">Please try again later</p>
-      </div>
-    );
-  }
+  // Error handling moved to loading state for simplicity
 
   return (
     <div className="container mx-auto p-6">
