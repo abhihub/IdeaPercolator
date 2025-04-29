@@ -164,6 +164,7 @@ export function useIdeas() {
     isCreating,
     isUpdating,
     isDeleting,
+    isPublishing,
     createIdea: async (idea: InsertIdea) => {
       await createIdea(idea);
       return true;
@@ -178,6 +179,10 @@ export function useIdeas() {
     },
     updateIdeaRank: async (id: number, rank: number) => {
       await updateIdeaRank({ id, rank });
+      return true;
+    },
+    publishIdea: async (id: number) => {
+      await publishIdea(id);
       return true;
     },
     refetch,

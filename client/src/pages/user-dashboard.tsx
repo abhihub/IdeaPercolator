@@ -1,4 +1,4 @@
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useIdeas } from "@/hooks/useIdeas";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { SortOptionType } from "@/hooks/useIdeas";
 import { Idea } from "@shared/schema";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
 import { Toaster } from "@/components/ui/toaster";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, ExternalLink, Share } from "lucide-react";
 
 export default function UserDashboard() {
   const { username } = useParams<{ username: string }>();
@@ -24,7 +24,7 @@ export default function UserDashboard() {
     }
   }, [user, username, navigate]);
   
-  const { ideas, isLoading, sortOptions, createIdea, updateIdea, deleteIdea, updateIdeaRank, sort } = useIdeas();
+  const { ideas, isLoading, sortOptions, createIdea, updateIdea, deleteIdea, updateIdeaRank, publishIdea, sort, isPublishing } = useIdeas();
   
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -75,6 +75,10 @@ export default function UserDashboard() {
         navigate('/auth');
       }
     });
+  };
+  
+  const handlePublishIdea = async (id: number) => {
+    await publishIdea(id);
   };
 
   if (isLoading) {
@@ -142,7 +146,8 @@ export default function UserDashboard() {
             onEdit={() => handleOpenEditForm(idea)}
             onDelete={() => handleOpenDeleteConfirm(idea.id)}
             onRankChange={updateIdeaRank}
-            isUpdating={false}
+            onPublish={handlePublishIdea}
+            isUpdating={isPublishing}
           />
         ))}
       </div>

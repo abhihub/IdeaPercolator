@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import PublicIdeas from "@/pages/public-ideas";
 import UserDashboard from "@/pages/user-dashboard";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
@@ -29,6 +30,9 @@ function Router() {
       
       {/* Authentication page */}
       <Route path="/auth" component={AuthPage} />
+      
+      {/* Public ideas route - accessible without login */}
+      <Route path="/public/:username" component={PublicIdeas} />
       
       {/* User-specific dashboard with username in URL */}
       <ProtectedRoute path="/:username">
