@@ -242,6 +242,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch public ideas" });
     }
   });
+  
+  // Get all published ideas from all users
+  app.get("/api/public", async (req, res) => {
+    try {
+      // Get all published ideas with username data
+      const publishedIdeas = await db
+        .select({
+          id: ideas.id,
+          title: ideas.title,
+          description: ideas.description,
+          rank: ideas.rank,
+          dateCreated: ideas.dateCreated,
+          dateModified: ideas.dateModified,
+          userId: ideas.userId,
+          published: ideas.published,
+          username: users.username
+        })
+        .from(ideas)
+        .innerJoin(users, eq(ideas.userId, users.id))
+        .where(eq(ideas.published, true))
+        .orderBy(ideas.dateModified);
+      
+      res.json(publishedIdeas);
+    } catch (error) {
+      console.error("Error fetching all public ideas:", error);
+      res.status(500).json({ message: "Failed to fetch all public ideas" });
+    }
+  });
 
   // Register API routes
   app.use("/api", apiRouter);

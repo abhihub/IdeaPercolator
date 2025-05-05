@@ -99,10 +99,16 @@ export default function UserDashboard() {
           <p className="text-muted-foreground">Welcome, {username}!</p>
         </div>
         <div className="flex gap-2">
+          <Link href="/public">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Share className="h-4 w-4" />
+              All Public Ideas
+            </Button>
+          </Link>
           <Link href={`/public/${username}`}>
             <Button variant="outline" className="flex items-center gap-2">
               <Share className="h-4 w-4" />
-              View Public Ideas
+              My Public Ideas
             </Button>
           </Link>
           <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
