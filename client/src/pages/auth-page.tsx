@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
+import { Share } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
@@ -189,6 +190,14 @@ export default function AuthPage() {
               </Form>
             </TabsContent>
           </Tabs>
+          <div className="p-4 text-center">
+            <Link href="/public">
+              <Button variant="ghost" className="flex items-center gap-2 mx-auto text-primary">
+                <Share className="h-4 w-4" />
+                Browse Public Ideas
+              </Button>
+            </Link>
+          </div>
         </Card>
       </div>
 
