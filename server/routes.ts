@@ -274,6 +274,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register API routes
   app.use("/api", apiRouter);
 
+  // Handle client-side routes for proper deployment support
+  // This ensures routes like /public work when accessed directly
+  app.get('/public', (req, res, next) => {
+    // This route will be handled by the frontend router
+    next();
+  });
+  
+  app.get('/public/*', (req, res, next) => {
+    // This route will be handled by the frontend router
+    next();
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
