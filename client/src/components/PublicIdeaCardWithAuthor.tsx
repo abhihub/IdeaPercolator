@@ -44,10 +44,10 @@ export default function PublicIdeaCardWithAuthor({ idea }: PublicIdeaCardWithAut
               <h3 className="text-lg font-semibold text-gray-900">{idea.title}</h3>
               <div className="flex items-center gap-2">
                 <Link href={`/public/${idea.username}`}>
-                  <a className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800">
+                  <span className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 cursor-pointer">
                     <User className="h-3 w-3" />
                     {idea.username}
-                  </a>
+                  </span>
                 </Link>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
                   <Share className="mr-1 h-3 w-3" />
