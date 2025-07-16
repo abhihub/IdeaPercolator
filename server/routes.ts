@@ -7,6 +7,7 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { setupAuth, ensureAuthenticated } from "./auth";
 import { eq, and } from "drizzle-orm";
+import { TwitterApi } from "twitter-api-v2";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -215,6 +216,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Publish an idea to Twitter
+  apiRouter.post("/ideas/:id/twitter", async (req, res) => {
+    try {
+      // Require authentication to publish to Twitter
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to publish to Twitter" });
+      }
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+
+      const idea = await storage.getIdea(id);
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Only allow users to publish their own ideas
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only publish your own ideas" });
+      }
+
+      // For now, return a success message (Twitter integration will be added later)
+      res.json({ 
+        message: "Twitter publishing feature is coming soon! Your idea would be shared as a tweet.",
+        idea: {
+          title: idea.title,
+          description: idea.description,
+          rank: idea.rank
+        }
+      });
+    } catch (error) {
+      console.error("Error publishing idea to Twitter:", error);
+      res.status(500).json({ message: "Failed to publish to Twitter" });
+    }
+  });
+
   // Get public ideas for a specific user
   app.get("/api/public/:username", async (req, res) => {
     try {
@@ -268,6 +307,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching all public ideas:", error);
       res.status(500).json({ message: "Failed to fetch all public ideas" });
+    }
+  });
+
+  // Publish idea to Twitter/X
+  apiRouter.post("/ideas/:id/twitter", async (req, res) => {
+    try {
+      // Require authentication to publish to Twitter
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to publish to Twitter" });
+      }
+      
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+
+      const idea = await storage.getIdea(id);
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+      
+      // Only allow users to publish their own ideas
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only publish your own ideas" });
+      }
+
+      // Check if Twitter credentials are provided
+      if (!process.env.TWITTER_API_KEY || !process.env.TWITTER_API_SECRET) {
+        return res.status(500).json({ message: "Twitter API credentials not configured" });
+      }
+
+      try {
+        // Initialize Twitter client with user credentials
+        const twitterClient = new TwitterApi({
+          appKey: process.env.TWITTER_API_KEY,
+          appSecret: process.env.TWITTER_API_SECRET,
+          accessToken: process.env.TWITTER_ACCESS_TOKEN,
+          accessSecret: process.env.TWITTER_ACCESS_SECRET,
+        });
+
+        // Format the tweet text
+        const tweetText = `💡 New idea: ${idea.title}
+
+${idea.description.substring(0, 200)}${idea.description.length > 200 ? '...' : ''}
+
+Maturity: ${idea.rank}/10
+#ThoughtPercolator #Ideas #Innovation`;
+
+        // Post the tweet
+        const tweet = await twitterClient.v2.tweet(tweetText);
+        
+        res.json({ 
+          success: true, 
+          tweetId: tweet.data.id,
+          message: "Successfully posted to Twitter!" 
+        });
+      } catch (twitterError: any) {
+        console.error("Twitter API error:", twitterError);
+        res.status(500).json({ 
+          message: "Failed to post to Twitter", 
+          error: twitterError.message 
+        });
+      }
+    } catch (error) {
+      console.error("Error publishing to Twitter:", error);
+      res.status(500).json({ message: "Failed to publish to Twitter" });
     }
   });
 

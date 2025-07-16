@@ -24,7 +24,7 @@ export default function UserDashboard() {
     }
   }, [user, username, navigate]);
   
-  const { ideas, isLoading, sortOptions, createIdea, updateIdea, deleteIdea, updateIdeaRank, publishIdea, sort, isPublishing } = useIdeas();
+  const { ideas, isLoading, sortOptions, createIdea, updateIdea, deleteIdea, updateIdeaRank, publishIdea, publishToTwitter, sort, isPublishing, isPublishingToTwitter } = useIdeas();
   
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -79,6 +79,10 @@ export default function UserDashboard() {
   
   const handlePublishIdea = async (id: number) => {
     await publishIdea(id);
+  };
+
+  const handleTwitterPublish = async (id: number) => {
+    await publishToTwitter(id);
   };
 
   if (isLoading) {
@@ -161,7 +165,8 @@ export default function UserDashboard() {
             onDelete={() => handleOpenDeleteConfirm(idea.id)}
             onRankChange={updateIdeaRank}
             onPublish={handlePublishIdea}
-            isUpdating={isPublishing}
+            onTwitterPublish={handleTwitterPublish}
+            isUpdating={isPublishing || isPublishingToTwitter}
           />
         ))}
       </div>

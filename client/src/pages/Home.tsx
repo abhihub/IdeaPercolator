@@ -20,10 +20,12 @@ export default function Home() {
     updateIdea, 
     deleteIdea, 
     updateIdeaRank, 
+    publishToTwitter,
     isLoading,
     isCreating,
     isUpdating,
     isDeleting,
+    isPublishingToTwitter,
     sort,
     currentSort,
     sortOptions
@@ -50,6 +52,10 @@ export default function Home() {
       setDeleteDialogOpen(false);
       setIdToDelete(null);
     }
+  };
+
+  const handleTwitterPublish = async (id: number) => {
+    await publishToTwitter(id);
   };
 
   return (
@@ -129,7 +135,8 @@ export default function Home() {
               onEdit={() => handleOpenEditForm(idea)}
               onDelete={() => handleDeleteConfirm(idea.id)}
               onRankChange={updateIdeaRank}
-              isUpdating={isUpdating}
+              onTwitterPublish={handleTwitterPublish}
+              isUpdating={isUpdating || isPublishingToTwitter}
             />
           ))
         )}

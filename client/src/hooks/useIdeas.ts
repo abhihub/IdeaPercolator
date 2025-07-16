@@ -141,6 +141,27 @@ export function useIdeas() {
     },
   });
 
+  // Publish an idea to Twitter
+  const { mutateAsync: publishToTwitter, isPending: isPublishingToTwitter } = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("POST", `/api/ideas/${id}/twitter`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Posted to Twitter!",
+        description: data.message || "Your idea has been shared on Twitter.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to post to Twitter",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Sort ideas based on current sort option
   const sortedIdeas = [...ideas].sort((a, b) => {
     if (currentSort === "rank-desc") {
@@ -165,6 +186,7 @@ export function useIdeas() {
     isUpdating,
     isDeleting,
     isPublishing,
+    isPublishingToTwitter,
     createIdea: async (idea: InsertIdea) => {
       await createIdea(idea);
       return true;
@@ -183,6 +205,10 @@ export function useIdeas() {
     },
     publishIdea: async (id: number) => {
       await publishIdea(id);
+      return true;
+    },
+    publishToTwitter: async (id: number) => {
+      await publishToTwitter(id);
       return true;
     },
     refetch,

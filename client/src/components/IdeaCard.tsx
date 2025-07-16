@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { ChevronUp, ChevronDown, MoreVertical, Share } from "lucide-react";
+import { FaTwitter } from "react-icons/fa";
 import { cn, formatDate, getMatureLabel } from "@/lib/utils";
 import { Idea } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,11 @@ interface IdeaCardProps {
   onDelete: () => void;
   onRankChange: (id: number, rank: number) => void;
   onPublish?: (id: number) => void;
+  onTwitterPublish?: (id: number) => void;
   isUpdating: boolean;
 }
 
-export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPublish, isUpdating }: IdeaCardProps) {
+export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPublish, onTwitterPublish, isUpdating }: IdeaCardProps) {
   const [isRankUpdating, setIsRankUpdating] = useState(false);
   
   const handleRankChange = async (change: number) => {
@@ -108,6 +110,15 @@ export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPubli
                     <DropdownMenuItem onClick={() => onPublish(idea.id)} className="text-blue-600">
                       <Share className="mr-2 h-4 w-4" />
                       Publish Idea
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {onTwitterPublish && (
+                  <>
+                    <DropdownMenuItem onClick={() => onTwitterPublish(idea.id)} className="text-blue-500">
+                      <FaTwitter className="mr-2 h-4 w-4" />
+                      Share on Twitter
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
