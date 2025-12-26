@@ -13,6 +13,7 @@ import { cn, formatDate, getMatureLabel } from "@/lib/utils";
 import { Idea } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import MarkdownDescription from "./MarkdownDescription";
 
 interface IdeaCardProps {
   idea: Idea;
@@ -130,7 +131,7 @@ export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPubli
             </DropdownMenu>
           </div>
           
-          <p className="text-gray-600 mb-3 whitespace-pre-line">{idea.description}</p>
+          <MarkdownDescription content={idea.description} className="mb-3" />
           
           <div className="flex justify-between items-center text-xs text-gray-500">
             <div className="flex items-center">

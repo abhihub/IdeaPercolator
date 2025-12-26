@@ -81,6 +81,9 @@ export default function IdeaForm({ idea, onSubmit, onCancel, isSubmitting }: Ide
                       {...field}
                     />
                   </FormControl>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Tip: Add links using [text](https://url.com) or paste URLs directly
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Share } from "lucide-react";
 import { cn, formatDate, getMatureLabel } from "@/lib/utils";
 import { Idea } from "@shared/schema";
+import MarkdownDescription from "./MarkdownDescription";
 
 interface PublicIdeaCardProps {
   idea: Idea;
@@ -36,7 +37,7 @@ export default function PublicIdeaCard({ idea }: PublicIdeaCardProps) {
             </div>
           </div>
           
-          <p className="text-gray-600 mb-3 whitespace-pre-line">{idea.description}</p>
+          <MarkdownDescription content={idea.description} className="mb-3" />
           
           <div className="flex justify-between items-center text-xs text-gray-500">
             <div className="flex items-center">
