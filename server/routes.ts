@@ -99,6 +99,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only update your own ideas" });
       }
 
+      // Save current version before updating
+      await storage.createIdeaVersion(id, idea);
+
       const validatedData = insertIdeaSchema.partial().parse(req.body);
       const updatedIdea = await storage.updateIdea(id, validatedData);
       res.json(updatedIdea);
@@ -108,6 +111,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.message });
       }
       res.status(500).json({ message: "Failed to update idea" });
+    }
+  });
+
+  // Get idea version history
+  apiRouter.get("/ideas/:id/versions", async (req, res) => {
+    try {
+      // Require authentication to view version history
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to view version history" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+
+      const idea = await storage.getIdea(id);
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found" });
+      }
+
+      // Only allow users to view their own idea history
+      if (idea.userId !== req.user.id) {
+        return res.status(403).json({ message: "You can only view your own idea history" });
+      }
+
+      const versions = await storage.getIdeaVersions(id);
+      res.json(versions);
+    } catch (error) {
+      console.error("Error fetching idea versions:", error);
+      res.status(500).json({ message: "Failed to fetch version history" });
     }
   });
 
