@@ -7,13 +7,14 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
-import { ChevronUp, ChevronDown, MoreVertical, Share } from "lucide-react";
+import { ChevronUp, ChevronDown, MoreVertical, Share, History } from "lucide-react";
 import { FaTwitter } from "react-icons/fa";
 import { cn, formatDate, getMatureLabel } from "@/lib/utils";
 import { Idea } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import MarkdownDescription from "./MarkdownDescription";
+import IdeaHistoryDrawer from "./IdeaHistoryDrawer";
 
 interface IdeaCardProps {
   idea: Idea;
@@ -27,6 +28,7 @@ interface IdeaCardProps {
 
 export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPublish, onTwitterPublish, isUpdating }: IdeaCardProps) {
   const [isRankUpdating, setIsRankUpdating] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   
   const handleRankChange = async (change: number) => {
     const newRank = idea.rank + change;
@@ -106,24 +108,23 @@ export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPubli
                 <DropdownMenuItem onClick={onEdit}>
                   Edit Idea
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowHistory(true)} data-testid="button-view-history">
+                  <History className="mr-2 h-4 w-4" />
+                  View History
+                </DropdownMenuItem>
                 {onPublish && !idea.published && (
-                  <>
-                    <DropdownMenuItem onClick={() => onPublish(idea.id)} className="text-blue-600">
-                      <Share className="mr-2 h-4 w-4" />
-                      Publish Idea
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
+                  <DropdownMenuItem onClick={() => onPublish(idea.id)} className="text-blue-600">
+                    <Share className="mr-2 h-4 w-4" />
+                    Publish Idea
+                  </DropdownMenuItem>
                 )}
                 {onTwitterPublish && (
-                  <>
-                    <DropdownMenuItem onClick={() => onTwitterPublish(idea.id)} className="text-blue-500">
-                      <FaTwitter className="mr-2 h-4 w-4" />
-                      Share on Twitter
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
+                  <DropdownMenuItem onClick={() => onTwitterPublish(idea.id)} className="text-blue-500">
+                    <FaTwitter className="mr-2 h-4 w-4" />
+                    Share on Twitter
+                  </DropdownMenuItem>
                 )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onDelete} className="text-red-600">
                   Delete Idea
                 </DropdownMenuItem>
@@ -147,6 +148,13 @@ export default function IdeaCard({ idea, onEdit, onDelete, onRankChange, onPubli
           </div>
         </div>
       </div>
+      
+      <IdeaHistoryDrawer
+        ideaId={idea.id}
+        ideaTitle={idea.title}
+        open={showHistory}
+        onOpenChange={setShowHistory}
+      />
     </Card>
   );
 }

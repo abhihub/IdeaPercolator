@@ -173,6 +173,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only update your own ideas" });
       }
 
+      // Save current version before updating rank
+      await storage.createIdeaVersion(id, idea);
+
       const updatedIdea = await storage.updateIdeaRank(id, rank);
       res.json(updatedIdea);
     } catch (error) {
