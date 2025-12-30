@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Share, User } from "lucide-react";
 import { cn, formatDate, getMatureLabel } from "@/lib/utils";
 import MarkdownDescription from "./MarkdownDescription";
@@ -22,6 +22,8 @@ interface PublicIdeaCardWithAuthorProps {
 }
 
 export default function PublicIdeaCardWithAuthor({ idea }: PublicIdeaCardWithAuthorProps) {
+  const [, navigate] = useLocation();
+  
   const cardClass = 
     idea.rank >= 8 ? "idea-card-mature" :
     idea.rank >= 5 ? "idea-card-developing" :
@@ -31,6 +33,12 @@ export default function PublicIdeaCardWithAuthor({ idea }: PublicIdeaCardWithAut
     idea.rank >= 8 ? "maturity-mature" :
     idea.rank >= 5 ? "maturity-developing" :
     "maturity-emerging";
+
+  const handleUsernameClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/public/${idea.username}`);
+  };
 
   return (
     <Link href={`/public/${idea.username}/${idea.id}`} data-testid={`link-idea-${idea.id}`}>
@@ -47,13 +55,14 @@ export default function PublicIdeaCardWithAuthor({ idea }: PublicIdeaCardWithAut
               <div className="flex flex-col gap-1">
                 <h3 className="text-lg font-semibold text-gray-900">{idea.title}</h3>
                 <div className="flex items-center gap-2">
-                  <span 
-                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
-                    onClick={(e) => e.stopPropagation()}
+                  <button 
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                    onClick={handleUsernameClick}
+                    data-testid={`link-user-${idea.username}`}
                   >
                     <User className="h-3 w-3" />
                     {idea.username}
-                  </span>
+                  </button>
                   <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
                     <Share className="mr-1 h-3 w-3" />
                     Published
