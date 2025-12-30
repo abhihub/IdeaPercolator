@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Share } from "lucide-react";
@@ -7,9 +8,10 @@ import MarkdownDescription from "./MarkdownDescription";
 
 interface PublicIdeaCardProps {
   idea: Idea;
+  username?: string;
 }
 
-export default function PublicIdeaCard({ idea }: PublicIdeaCardProps) {
+export default function PublicIdeaCard({ idea, username }: PublicIdeaCardProps) {
   // Determine card styling based on rank
   const cardClass = 
     idea.rank >= 8 ? "idea-card-mature" :
@@ -22,10 +24,16 @@ export default function PublicIdeaCard({ idea }: PublicIdeaCardProps) {
     idea.rank >= 5 ? "maturity-developing" :
     "maturity-emerging";
 
-  return (
-    <Card className={cn("bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200", cardClass)}>
+  const cardContent = (
+    <Card 
+      className={cn(
+        "bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200",
+        cardClass,
+        username && "cursor-pointer hover:shadow-md"
+      )}
+      data-testid={`card-public-idea-${idea.id}`}
+    >
       <div className="flex flex-col">
-        {/* Content */}
         <div className="p-5 flex-1">
           <div className="flex justify-between items-start mb-3">
             <div className="flex items-center gap-2">
@@ -37,7 +45,7 @@ export default function PublicIdeaCard({ idea }: PublicIdeaCardProps) {
             </div>
           </div>
           
-          <MarkdownDescription content={idea.description} className="mb-3" />
+          <MarkdownDescription content={idea.description} className="mb-3 line-clamp-3" />
           
           <div className="flex justify-between items-center text-xs text-gray-500">
             <div className="flex items-center">
@@ -55,4 +63,14 @@ export default function PublicIdeaCard({ idea }: PublicIdeaCardProps) {
       </div>
     </Card>
   );
+
+  if (username) {
+    return (
+      <Link href={`/public/${username}/${idea.id}`} data-testid={`link-idea-${idea.id}`}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

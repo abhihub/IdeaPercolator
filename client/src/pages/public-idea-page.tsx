@@ -1,0 +1,138 @@
+import { useParams, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Share, Home, ArrowLeft, Loader2, Calendar, TrendingUp } from "lucide-react";
+import { cn, formatDate, getMatureLabel } from "@/lib/utils";
+import MarkdownDescription from "@/components/MarkdownDescription";
+import { Idea } from "@shared/schema";
+
+interface PublicIdeaWithUsername extends Idea {
+  username: string;
+}
+
+export default function PublicIdeaPage() {
+  const { username, ideaId } = useParams<{ username: string; ideaId: string }>();
+
+  const { data: idea, isLoading, error } = useQuery<PublicIdeaWithUsername>({
+    queryKey: [`/api/public/${username}/${ideaId}`],
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !idea) {
+    return (
+      <div className="container mx-auto p-6 text-center py-12">
+        <h2 className="text-2xl font-bold mb-4">Idea Not Found</h2>
+        <p className="text-muted-foreground mb-6">
+          This idea doesn't exist, hasn't been published, or has been removed.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Link href={`/public/${username}`}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to {username}'s Ideas
+            </Button>
+          </Link>
+          <Link href="/public">
+            <Button className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              All Public Ideas
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const cardClass = 
+    idea.rank >= 8 ? "idea-card-mature" :
+    idea.rank >= 5 ? "idea-card-developing" :
+    "idea-card-emerging";
+
+  const maturityBarClass = 
+    idea.rank >= 8 ? "maturity-mature" :
+    idea.rank >= 5 ? "maturity-developing" :
+    "maturity-emerging";
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto p-6 max-w-3xl">
+        <header className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-bold">Thought Percolator</h1>
+            <p className="text-muted-foreground">Idea by {username}</p>
+          </div>
+          <div className="flex gap-2">
+            <Link href={`/public/${username}`}>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                All Ideas
+              </Button>
+            </Link>
+            <Link href="/public">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </header>
+
+        <Card className={cn("bg-white rounded-lg shadow-md overflow-hidden", cardClass)} data-testid="card-public-idea">
+          <div className="p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">{idea.title}</h2>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                <Share className="mr-1 h-3 w-3" />
+                Published
+              </Badge>
+            </div>
+            
+            <div className="prose prose-lg max-w-none mb-6">
+              <MarkdownDescription content={idea.description} />
+            </div>
+            
+            <div className="border-t pt-6 mt-6">
+              <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Maturity: <strong>{idea.rank}/10</strong> - {getMatureLabel(idea.rank)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>Created: {formatDate(idea.dateCreated)}</span>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <div className="maturity-indicator w-full h-3 rounded-full bg-gray-100">
+                  <div
+                    className={cn("maturity-bar h-3 rounded-full", maturityBarClass)}
+                    style={{ width: `${idea.rank * 10}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            Want to share your own ideas?
+          </p>
+          <Link href="/auth">
+            <Button>Get Started</Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

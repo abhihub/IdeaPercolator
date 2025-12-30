@@ -103,6 +103,7 @@ export default function PublicIdeas() {
           <PublicIdeaCard
             key={idea.id}
             idea={idea}
+            username={username}
           />
         ))}
       </div>

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import PublicIdeas from "@/pages/public-ideas";
+import PublicIdeaPage from "@/pages/public-idea-page";
 import AllPublicIdeas from "@/pages/all-public-ideas";
 import UserDashboard from "@/pages/user-dashboard";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -34,6 +35,7 @@ function Router() {
       
       {/* Public ideas routes - accessible without login */}
       <Route path="/public" component={AllPublicIdeas} />
+      <Route path="/public/:username/:ideaId" component={PublicIdeaPage} />
       <Route path="/public/:username" component={PublicIdeas} />
       
       {/* User-specific dashboard with username in URL */}

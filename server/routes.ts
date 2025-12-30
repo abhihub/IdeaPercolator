@@ -318,6 +318,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch public ideas" });
     }
   });
+
+  // Get a single public idea by username and idea ID
+  app.get("/api/public/:username/:ideaId", async (req, res) => {
+    try {
+      const { username, ideaId } = req.params;
+      const id = parseInt(ideaId);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid idea ID" });
+      }
+      
+      // First, get the user by username
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get the specific published idea
+      const [idea] = await db
+        .select()
+        .from(ideas)
+        .where(and(
+          eq(ideas.id, id),
+          eq(ideas.userId, user.id),
+          eq(ideas.published, true)
+        ));
+      
+      if (!idea) {
+        return res.status(404).json({ message: "Idea not found or not published" });
+      }
+      
+      res.json({ ...idea, username: user.username });
+    } catch (error) {
+      console.error("Error fetching public idea:", error);
+      res.status(500).json({ message: "Failed to fetch public idea" });
+    }
+  });
   
   // Get all published ideas from all users
   app.get("/api/public", async (req, res) => {
