@@ -1,6 +1,6 @@
-import { ideas, type Idea, type InsertIdea, users, type User, type InsertUser } from "@shared/schema";
+import { ideas, type Idea, type InsertIdea, users, type User, type InsertUser, ideaVersions, type IdeaVersion } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -14,6 +14,10 @@ export interface IStorage {
   updateIdea(id: number, idea: Partial<InsertIdea>): Promise<Idea | undefined>;
   deleteIdea(id: number): Promise<boolean>;
   updateIdeaRank(id: number, rank: number): Promise<Idea | undefined>;
+  
+  // Version history operations
+  createIdeaVersion(ideaId: number, idea: Idea): Promise<IdeaVersion>;
+  getIdeaVersions(ideaId: number): Promise<IdeaVersion[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -100,6 +104,39 @@ export class DatabaseStorage implements IStorage {
       .where(eq(ideas.id, id))
       .returning();
     return updatedIdea;
+  }
+
+  async createIdeaVersion(ideaId: number, idea: Idea): Promise<IdeaVersion> {
+    // Get the next version number
+    const versions = await db
+      .select({ versionNumber: ideaVersions.versionNumber })
+      .from(ideaVersions)
+      .where(eq(ideaVersions.ideaId, ideaId))
+      .orderBy(desc(ideaVersions.versionNumber))
+      .limit(1);
+    
+    const nextVersionNumber = versions.length > 0 ? versions[0].versionNumber + 1 : 1;
+    
+    const [version] = await db
+      .insert(ideaVersions)
+      .values({
+        ideaId,
+        versionNumber: nextVersionNumber,
+        title: idea.title,
+        description: idea.description,
+        rank: idea.rank,
+      })
+      .returning();
+    
+    return version;
+  }
+
+  async getIdeaVersions(ideaId: number): Promise<IdeaVersion[]> {
+    return db
+      .select()
+      .from(ideaVersions)
+      .where(eq(ideaVersions.ideaId, ideaId))
+      .orderBy(desc(ideaVersions.versionNumber));
   }
 }
 

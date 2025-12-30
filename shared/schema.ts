@@ -19,6 +19,16 @@ export const ideas = pgTable("ideas", {
   published: boolean("published").notNull().default(false),
 });
 
+export const ideaVersions = pgTable("idea_versions", {
+  id: serial("id").primaryKey(),
+  ideaId: integer("idea_id").notNull().references(() => ideas.id, { onDelete: "cascade" }),
+  versionNumber: integer("version_number").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  rank: integer("rank").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -30,8 +40,16 @@ export const insertIdeaSchema = createInsertSchema(ideas).pick({
   rank: true,
 });
 
+export const insertIdeaVersionSchema = createInsertSchema(ideaVersions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 export type InsertIdea = z.infer<typeof insertIdeaSchema>;
 export type Idea = typeof ideas.$inferSelect;
+
+export type InsertIdeaVersion = z.infer<typeof insertIdeaVersionSchema>;
+export type IdeaVersion = typeof ideaVersions.$inferSelect;
